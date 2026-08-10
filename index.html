@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Cloud Quest</title>
+<style>
+  :root {
+    --bg:#07101f; --panel:#0e1b2e; --panel2:#12243b; --text:#f7fbff;
+    --muted:#9bb0c8; --orange:#ff9900; --blue:#38bdf8; --green:#22c55e;
+    --red:#ef4444; --border:rgba(255,255,255,.09);
+  }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; min-height:100vh; font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(56,189,248,.12), transparent 27%),
+      radial-gradient(circle at 80% 80%, rgba(255,153,0,.12), transparent 30%),
+      var(--bg);
+    color:var(--text); display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .shell { width:min(920px,100%); }
+  .brand { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:18px; }
+  .cloud { font-size:34px; filter:drop-shadow(0 0 14px rgba(56,189,248,.25)); }
+  .brand-title { font-weight:900; letter-spacing:.08em; font-size:14px; color:var(--muted); }
+  .card {
+    background:linear-gradient(180deg,rgba(18,36,59,.94),rgba(9,19,34,.96));
+    border:1px solid var(--border); border-radius:26px; box-shadow:0 22px 80px rgba(0,0,0,.36);
+    padding:clamp(22px,5vw,48px); backdrop-filter:blur(14px);
+  }
+  h1 { font-size:clamp(38px,7vw,72px); margin:0 0 10px; line-height:.95; letter-spacing:-.05em; text-align:center; }
+  .accent { color:var(--orange); }
+  .subtitle { color:var(--muted); text-align:center; font-size:17px; line-height:1.6; max-width:650px; margin:0 auto 28px; }
+  .instructions {
+    display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:28px 0;
+  }
+  .tip { padding:16px; border-radius:16px; background:rgba(255,255,255,.035); border:1px solid var(--border); text-align:center; }
+  .tip b { display:block; margin-bottom:5px; }
+  button { font:inherit; }
+  .primary {
+    width:100%; border:0; border-radius:16px; padding:17px 22px; cursor:pointer;
+    background:linear-gradient(135deg,var(--orange),#ffb84d); color:#16100a; font-weight:900; font-size:17px;
+    box-shadow:0 10px 30px rgba(255,153,0,.18); transition:.18s transform,.18s filter;
+  }
+  .primary:hover { transform:translateY(-2px); filter:brightness(1.05); }
+  .hidden { display:none !important; }
+  .topbar { display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:18px; }
+  .stat { color:var(--muted); font-size:14px; }
+  .stat b { color:var(--text); font-size:16px; }
+  .progress { height:9px; background:rgba(255,255,255,.07); border-radius:999px; overflow:hidden; margin-bottom:28px; }
+  .progress > div { height:100%; width:0; background:linear-gradient(90deg,var(--blue),var(--orange)); transition:width .3s ease; }
+  .question-number { color:var(--orange); font-weight:800; font-size:13px; text-transform:uppercase; letter-spacing:.12em; margin-bottom:10px; }
+  .question { font-size:clamp(24px,4vw,36px); line-height:1.24; letter-spacing:-.025em; margin-bottom:26px; font-weight:850; }
+  .answers { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+  .answer {
+    text-align:left; border:1px solid var(--border); background:rgba(255,255,255,.035); color:var(--text);
+    border-radius:16px; padding:17px 18px; cursor:pointer; min-height:72px; line-height:1.35;
+    transition:.16s ease; display:flex; gap:12px; align-items:flex-start;
+  }
+  .answer:hover:not(:disabled) { background:rgba(56,189,248,.08); border-color:rgba(56,189,248,.35); transform:translateY(-1px); }
+  .answer:disabled { cursor:default; }
+  .letter {
+    min-width:28px; height:28px; display:grid; place-items:center; border-radius:8px;
+    background:rgba(255,255,255,.08); font-weight:900; color:var(--muted);
+  }
+  .answer.correct { border-color:rgba(34,197,94,.8); background:rgba(34,197,94,.14); }
+  .answer.wrong { border-color:rgba(239,68,68,.8); background:rgba(239,68,68,.13); }
+  .feedback { margin-top:18px; min-height:30px; font-weight:750; }
+  .feedback.good { color:#86efac; } .feedback.bad { color:#fca5a5; }
+  .next { margin-top:18px; }
+  .result-score { text-align:center; font-size:clamp(70px,13vw,120px); font-weight:950; line-height:1; color:var(--orange); margin:12px 0; }
+  .rank { text-align:center; font-size:28px; font-weight:900; margin-bottom:8px; }
+  .result-copy { text-align:center; color:var(--muted); margin-bottom:25px; }
+  .result-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:25px 0; }
+  .result-box { text-align:center; padding:18px; border:1px solid var(--border); border-radius:16px; background:rgba(255,255,255,.03); }
+  .result-box strong { font-size:24px; display:block; }
+  .footer { text-align:center; color:#60748b; font-size:12px; margin-top:18px; }
+  @media(max-width:700px) {
+    .instructions,.result-grid,.answers { grid-template-columns:1fr; }
+    .card { padding:22px; border-radius:20px; }
+    .topbar { flex-wrap:wrap; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="brand"><div class="cloud">☁️</div><div class="brand-title">AWS CERTIFIED CLOUD PRACTITIONER STUDY GAME</div></div>
+
+  <section id="start" class="card">
+    <h1>AWS <span class="accent">Cloud Quest</span></h1>
+    <p class="subtitle">Test your AWS knowledge across cloud concepts, pricing, security, storage, networking, databases, monitoring, and architecture.</p>
+    <div class="instructions">
+      <div class="tip"><b>🎯 50 Questions</b><span class="stat">One point per correct answer</span></div>
+      <div class="tip"><b>🔥 Build a Streak</b><span class="stat">Keep answering correctly</span></div>
+      <div class="tip"><b>🔀 Randomized</b><span class="stat">Questions and choices shuffle</span></div>
+    </div>
+    <button class="primary" onclick="startGame()">Start Challenge</button>
+  </section>
+
+  <section id="game" class="card hidden">
+    <div class="topbar">
+      <div class="stat">Question <b id="counter">1 / 50</b></div>
+      <div class="stat">Score <b id="score">0</b></div>
+      <div class="stat">🔥 Streak <b id="streak">0</b></div>
+    </div>
+    <div class="progress"><div id="progressBar"></div></div>
+    <div id="qNum" class="question-number">Question 1</div>
+    <div id="question" class="question"></div>
+    <div id="answers" class="answers"></div>
+    <div id="feedback" class="feedback"></div>
+    <button id="nextBtn" class="primary next hidden" onclick="nextQuestion()">Next Question →</button>
+  </section>
+
+  <section id="result" class="card hidden">
+    <div style="text-align:center;font-size:42px">🏆</div>
+    <h1>Quest <span class="accent">Complete</span></h1>
+    <div id="finalScore" class="result-score">0/50</div>
+    <div id="rank" class="rank">Cloud Explorer</div>
+    <div id="resultCopy" class="result-copy"></div>
+    <div class="result-grid">
+      <div class="result-box"><strong id="correctStat">0</strong><span class="stat">Correct</span></div>
+      <div class="result-box"><strong id="accuracyStat">0%</strong><span class="stat">Accuracy</span></div>
+      <div class="result-box"><strong id="bestStreakStat">0</strong><span class="stat">Best Streak</span></div>
+    </div>
+    <button class="primary" onclick="startGame()">Play Again ↻</button>
+  </section>
+  <div class="footer">AWS Cloud Quest • IT 335 • Cloud Practitioner Review</div>
+</div>
+
+<script>
+const baseQuestions = [{"q": "Which AWS service gives recommendations to help follow AWS best practices?", "options": ["AWS Control Tower", "AWS Trusted Advisor", "AWS Cost Explorer", "IAM Access Analyzer"], "answer": 1}, {"q": "What is another term for block storage in AWS?", "options": ["Object", "Document", "Volume", "Blob"], "answer": 2}, {"q": "Which AWS database service is commonly used for data warehouses and analytics?", "options": ["Amazon QLDB", "Amazon Neptune", "Amazon Aurora", "Amazon Redshift"], "answer": 3}, {"q": "Which AWS database is a key-value database used for high-traffic web apps, e-commerce, and gaming?", "options": ["Amazon QLDB", "Amazon Neptune", "Amazon Aurora", "Amazon DynamoDB"], "answer": 3}, {"q": "Which AWS service is used for monitoring AWS resources and collecting metrics?", "options": ["AWS CloudTrail", "Amazon CloudFront", "Amazon CloudWatch", "AWS CloudFormation"], "answer": 2}, {"q": "Which relational database engine is supported by Amazon Aurora?", "options": ["PostgreSQL", "Oracle Database", "SQL Server", "MariaDB"], "answer": 0}, {"q": "Which AWS service provides free basic protection against DDoS attacks for AWS customers?", "options": ["Security Groups", "Site-to-Site VPN", "AWS Shield Standard", "AWS Shield Advanced"], "answer": 2}, {"q": "Which AWS service is an easy-to-use cloud platform for building small business applications or websites?", "options": ["AWS Lambda", "Amazon EC2", "Amazon Lightsail", "AWS Fargate"], "answer": 2}, {"q": "What is another term for serverless services in AWS?", "options": ["Functions-as-a-service", "Infrastructure-as-code", "Compute-as-a-service", "Indicators-of-compromise"], "answer": 0}, {"q": "Which technology helps cloud computing deliver multi-tenancy by running multiple virtual machines on the same physical hardware?", "options": ["Switches", "Databases", "Servers", "Hypervisors"], "answer": 3}, {"q": "What is the main purpose of the AWS Pricing Calculator?", "options": ["To automatically pay an AWS bill", "To estimate the cost of AWS services before using them", "To monitor the performance of AWS resources", "To create AWS resources automatically"], "answer": 1}, {"q": "Which cloud economics benefit allows a company to replace the cost of buying physical servers with costs based on actual usage?", "options": ["High availability", "Global deployment", "Trading fixed expenses for variable expenses", "Increased data storage"], "answer": 2}, {"q": "Why can AWS offer lower pay-as-you-go prices than many companies could achieve with their own data centers?", "options": ["AWS benefits from economies of scale", "AWS does not charge for computing resources", "AWS only supports small companies", "AWS uses one data center for all customers"], "answer": 0}, {"q": "Which AWS cloud architecture principle helps prevent a company from paying for unused computing resources?", "options": ["Store all data in one location", "Purchase enough servers for the next ten years", "Use the largest instance available", "Stop guessing capacity needs"], "answer": 3}, {"q": "Which pillar of the AWS Well-Architected Framework focuses on delivering business value at the lowest possible price?", "options": ["Reliability", "Cost Optimization", "Security", "Operational Excellence"], "answer": 1}, {"q": "Why can testing an application at production scale be more affordable in the AWS Cloud?", "options": ["Testing environments never use AWS resources", "AWS automatically makes all testing free", "Resources can be created when needed and removed after testing", "Production testing does not require servers"], "answer": 2}, {"q": "Which statement best describes Amazon EC2 On-Demand pricing?", "options": ["You pay for compute capacity as you use it without a long-term commitment", "You must purchase the physical server before using it", "You pay the same amount regardless of usage", "You must commit to using the instance for three years"], "answer": 0}, {"q": "What does right-sizing AWS resources mean?", "options": ["Selecting the most expensive resource available", "Using the same resource size for every application", "Running every workload on the smallest possible instance", "Selecting resource types and sizes that match the workload’s needs"], "answer": 3}, {"q": "How can groups be used in the AWS Pricing Calculator?", "options": ["To give IAM permissions to users", "To organize services and compare different architectures or AWS Regions", "To automatically launch multiple EC2 instances", "To connect different AWS accounts"], "answer": 1}, {"q": "Which information would be important when creating an Amazon EC2 estimate in the AWS Pricing Calculator?", "options": ["The name of the company’s CEO", "The number of employees using email", "The operating system, instance type, and expected usage", "The password for the AWS account"], "answer": 2}, {"q": "Which AWS service is used to create, manage, and protect cryptographic keys?", "options": ["Amazon GuardDuty", "AWS Key Management Service", "AWS Artifact", "Amazon Inspector"], "answer": 1}, {"q": "Which AWS security feature is stateful and controls traffic at the instance level?", "options": ["Network ACL", "Security group", "AWS WAF", "VPC Flow Logs"], "answer": 1}, {"q": "Which AWS security feature is stateless and controls inbound and outbound traffic at the subnet level?", "options": ["Security group", "IAM policy", "Network access control list", "AWS Shield"], "answer": 2}, {"q": "Which AWS service provides fully managed threat detection using machine learning and threat intelligence?", "options": ["Amazon GuardDuty", "AWS Artifact", "AWS KMS", "Amazon Macie"], "answer": 0}, {"q": "Which AWS service provides access to compliance reports, certifications, and agreements?", "options": ["AWS Shield Advanced", "AWS Artifact", "Amazon Inspector", "AWS Organizations"], "answer": 1}, {"q": "What is a feature available with AWS Shield Advanced?", "options": ["Free basic DDoS protection only", "Access to the 24/7 DDoS Response Team", "Automatic creation of IAM users", "Encryption of all S3 objects"], "answer": 1}, {"q": "Which component is used to apply AWS Web Application Firewall rules?", "options": ["Security groups", "Network ACLs", "Web access control lists", "Elastic network interfaces"], "answer": 2}, {"q": "What is the main purpose of an IAM group?", "options": ["To store files in Amazon S3", "To assign the same permissions to multiple IAM users", "To create temporary EC2 instances", "To protect a VPC from DDoS attacks"], "answer": 1}, {"q": "What is a bastion host also commonly called?", "options": ["Database host", "Jump box", "Storage gateway", "Load balancer"], "answer": 1}, {"q": "Which principle recommends giving users only the permissions required to complete their tasks?", "options": ["High availability", "Least privilege", "Elasticity", "Fault tolerance"], "answer": 1}, {"q": "Which AWS service provides virtual servers with different processor, storage, networking, and operating system options?", "options": ["Amazon S3", "Amazon EC2", "Amazon CloudFront", "AWS CloudTrail"], "answer": 1}, {"q": "Which AWS service allows users to create and manage infrastructure by using JSON or YAML templates?", "options": ["Amazon CloudWatch", "AWS CloudFormation", "Amazon GuardDuty", "AWS Config"], "answer": 1}, {"q": "Which AWS service securely delivers websites, videos, applications, and APIs to global users with low latency?", "options": ["Amazon CloudFront", "Amazon EBS", "AWS CloudTrail", "Amazon DynamoDB"], "answer": 0}, {"q": "Which format is commonly used to write IAM policies and Amazon S3 bucket policies?", "options": ["Python", "Java", "JSON", "SQL"], "answer": 2}, {"q": "Which AWS service provides scalable object storage for files, images, videos, backups, and other data?", "options": ["Amazon EC2", "Amazon S3", "Amazon EBS", "Amazon VPC"], "answer": 1}, {"q": "Which AWS component contains the operating system, software, and configuration needed to launch an EC2 instance?", "options": ["Amazon Machine Image", "Security group", "Target group", "Network ACL"], "answer": 0}, {"q": "Which AWS service provides block-level storage volumes that can be attached to Amazon EC2 instances?", "options": ["Amazon S3", "Amazon CloudFront", "Amazon Elastic Block Store", "Amazon Route 53"], "answer": 2}, {"q": "Which Auto Scaling component defines settings such as the AMI, instance type, storage, and security groups for new EC2 instances?", "options": ["Target group", "Launch template", "Availability Zone", "VPC Flow Log"], "answer": 1}, {"q": "Which AWS service monitors resources and applications by collecting metrics, logs, and alarms?", "options": ["AWS CloudTrail", "Amazon CloudWatch", "AWS CloudFormation", "Amazon CloudFront"], "answer": 1}, {"q": "What is the main purpose of an Elastic Load Balancer?", "options": ["To encrypt data stored in Amazon S3", "To distribute incoming traffic across multiple resources", "To create IAM users automatically", "To store operating system images"], "answer": 1}, {"q": "Which AWS service translates domain names into IP addresses and routes users to internet applications?", "options": ["Amazon CloudFront", "Amazon Route 53", "Amazon VPC", "AWS Direct Connect"], "answer": 1}, {"q": "What is the main purpose of an AWS Availability Zone?", "options": ["To provide one physical server for each AWS customer", "To provide an isolated location within an AWS Region for running resources", "To store IAM passwords", "To connect AWS accounts to social media platforms"], "answer": 1}, {"q": "Which AWS service records API calls and account activity to help with auditing and security investigations?", "options": ["Amazon CloudWatch", "AWS CloudTrail", "Amazon Route 53", "AWS Auto Scaling"], "answer": 1}, {"q": "What is the main purpose of an Amazon Virtual Private Cloud (VPC)?", "options": ["To create a logically isolated virtual network for AWS resources", "To automatically back up every AWS resource", "To distribute website content globally", "To estimate monthly AWS costs"], "answer": 0}, {"q": "Which AWS service can be used to manage multiple AWS accounts from one central location?", "options": ["AWS Organizations", "Amazon Inspector", "AWS CloudFormation", "Amazon CloudFront"], "answer": 0}, {"q": "Under the AWS Shared Responsibility Model, which task is generally the customer's responsibility?", "options": ["Protecting AWS data centers", "Maintaining the physical servers", "Managing permissions for their AWS resources", "Maintaining the physical network infrastructure"], "answer": 2}, {"q": "Which AWS service is designed to send notifications through methods such as email, SMS, and application endpoints?", "options": ["Amazon SNS", "Amazon S3", "Amazon EBS", "Amazon Redshift"], "answer": 0}, {"q": "Which AWS service provides a managed message queue that allows application components to communicate asynchronously?", "options": ["Amazon Route 53", "Amazon SQS", "AWS Artifact", "Amazon Aurora"], "answer": 1}, {"q": "What is the main benefit of deploying an application across multiple Availability Zones?", "options": ["It guarantees that AWS services will be free", "It improves availability and fault tolerance", "It removes the need for security groups", "It prevents users from accessing the internet"], "answer": 1}, {"q": "Which AWS Support plan provides a designated Technical Account Manager (TAM)?", "options": ["Basic Support", "Developer Support", "Business Support", "Enterprise Support"], "answer": 3}];
+
+let questions = [];
+let current = 0, score = 0, streak = 0, bestStreak = 0, locked = false;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function prepareQuestion(item) {
+  const indexed = item.options.map((text, i) => ({ text, correct: i === item.answer }));
+  return { q: item.q, options: shuffle(indexed) };
+}
+
+function startGame() {
+  questions = shuffle(baseQuestions).map(prepareQuestion);
+  current = 0; score = 0; streak = 0; bestStreak = 0; locked = false;
+  document.getElementById('start').classList.add('hidden');
+  document.getElementById('result').classList.add('hidden');
+  document.getElementById('game').classList.remove('hidden');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  locked = false;
+  const item = questions[current];
+  document.getElementById('counter').textContent = `${current + 1} / ${questions.length}`;
+  document.getElementById('score').textContent = score;
+  document.getElementById('streak').textContent = streak;
+  document.getElementById('qNum').textContent = `Question ${current + 1}`;
+  document.getElementById('question').textContent = item.q;
+  document.getElementById('progressBar').style.width = `${(current / questions.length) * 100}%`;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('nextBtn').classList.add('hidden');
+
+  const box = document.getElementById('answers');
+  box.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  item.options.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer';
+    btn.innerHTML = `<span class="letter">${letters[idx]}</span><span>${escapeHTML(opt.text)}</span>`;
+    btn.onclick = () => chooseAnswer(btn, opt.correct);
+    btn.dataset.correct = opt.correct ? '1' : '0';
+    box.appendChild(btn);
+  });
+}
+
+function chooseAnswer(button, isCorrect) {
+  if (locked) return;
+  locked = true;
+  const buttons = [...document.querySelectorAll('.answer')];
+  buttons.forEach(b => b.disabled = true);
+
+  const feedback = document.getElementById('feedback');
+  if (isCorrect) {
+    button.classList.add('correct');
+    score++; streak++; bestStreak = Math.max(bestStreak, streak);
+    feedback.textContent = streak >= 3 ? `Correct! 🔥 ${streak} in a row.` : 'Correct! Nice work.';
+    feedback.classList.add('good');
+  } else {
+    button.classList.add('wrong');
+    streak = 0;
+    const correct = buttons.find(b => b.dataset.correct === '1');
+    if (correct) correct.classList.add('correct');
+    feedback.textContent = 'Not quite — the correct answer is highlighted.';
+    feedback.classList.add('bad');
+  }
+
+  document.getElementById('score').textContent = score;
+  document.getElementById('streak').textContent = streak;
+  const next = document.getElementById('nextBtn');
+  next.textContent = current === questions.length - 1 ? 'See Results →' : 'Next Question →';
+  next.classList.remove('hidden');
+}
+
+function nextQuestion() {
+  if (current < questions.length - 1) {
+    current++;
+    renderQuestion();
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  document.getElementById('game').classList.add('hidden');
+  document.getElementById('result').classList.remove('hidden');
+  const total = questions.length;
+  const pct = Math.round(score / total * 100);
+  let rank, copy;
+  if (score >= 45) { rank='AWS Cloud Master 🏆'; copy='Excellent work. You have a strong command of the Cloud Practitioner material.'; }
+  else if (score >= 35) { rank='Cloud Architect ☁️'; copy='Great score. Review a few missed concepts and you are in strong shape.'; }
+  else if (score >= 25) { rank='Cloud Explorer 🚀'; copy='Solid foundation. Keep reviewing the services and concepts you missed.'; }
+  else { rank='Cloud Trainee 📚'; copy='Keep training. Another run through the quest will help reinforce the core AWS concepts.'; }
+  document.getElementById('finalScore').textContent = `${score}/${total}`;
+  document.getElementById('rank').textContent = rank;
+  document.getElementById('resultCopy').textContent = copy;
+  document.getElementById('correctStat').textContent = score;
+  document.getElementById('accuracyStat').textContent = `${pct}%`;
+  document.getElementById('bestStreakStat').textContent = bestStreak;
+  document.getElementById('progressBar').style.width = '100%';
+}
+
+function escapeHTML(str) {
+  return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+</script>
+</body>
+</html>
