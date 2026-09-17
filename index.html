@@ -3,7 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AWS Cloud Quest</title>
+<meta name="description" content="A 50-question interactive AWS Cloud Practitioner study game covering security, compute, storage, networking, databases, pricing, and architecture.">
+<meta name="author" content="Humberto Villanueva">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#07101f">
+<meta property="og:type" content="website">
+<meta property="og:title" content="AWS Cloud Quest — Cloud Practitioner Study Game">
+<meta property="og:description" content="Test your AWS knowledge with 50 randomized questions, instant feedback, streak tracking, and a final score.">
+<title>AWS Cloud Quest — Cloud Practitioner Study Game</title>
 <style>
   :root {
     --bg:#07101f; --panel:#0e1b2e; --panel2:#12243b; --text:#f7fbff;
@@ -75,6 +82,7 @@
   .result-box { text-align:center; padding:18px; border:1px solid var(--border); border-radius:16px; background:rgba(255,255,255,.03); }
   .result-box strong { font-size:24px; display:block; }
   .footer { text-align:center; color:#60748b; font-size:12px; margin-top:18px; }
+  .footer a { color:#9bb0c8; }
   @media(max-width:700px) {
     .instructions,.result-grid,.answers { grid-template-columns:1fr; }
     .card { padding:22px; border-radius:20px; }
@@ -124,7 +132,7 @@
     </div>
     <button class="primary" onclick="startGame()">Play Again ↻</button>
   </section>
-  <div class="footer">AWS Cloud Quest • IT 335 • Cloud Practitioner Review</div>
+  <div class="footer">AWS Cloud Quest • IT 335 • Cloud Practitioner Review • <a href="https://humbertovillanueva.dev" rel="author">Humberto Villanueva</a></div>
 </div>
 
 <script>
