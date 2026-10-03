@@ -18,8 +18,8 @@ The challenge contains 50 questions across cloud economics, security, compute, s
 No build step is required. Clone the repository and open `index.html` in a browser.
 
 ```bash
-git clone https://github.com/humbertovillanueva/aws-cloud-quest..git
-cd aws-cloud-quest.
+git clone https://github.com/humbertovillanueva/aws-cloud-quest.git
+cd aws-cloud-quest
 open index.html
 ```
 
