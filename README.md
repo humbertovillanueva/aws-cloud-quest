@@ -2,6 +2,8 @@
 
 An interactive browser-based study game for reviewing AWS Certified Cloud Practitioner concepts.
 
+[Play it live](https://humbertovillanueva.github.io/aws-cloud-quest/) · [Case study: how I built it](https://humbertovillanueva.dev/case-studies/aws-cloud-quest)
+
 The challenge contains 50 questions across cloud economics, security, compute, storage, networking, databases, monitoring, messaging, and the AWS Well-Architected Framework. Questions are shuffled for each run, answers receive immediate feedback, and the final screen summarizes the score and best streak.
 
 ## Highlights
