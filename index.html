@@ -117,11 +117,11 @@
       <div class="stat">Score <b id="score">0</b></div>
       <div class="stat">🔥 Streak <b id="streak">0</b></div>
     </div>
-    <div class="progress"><div id="progressBar"></div></div>
+    <div class="progress" role="progressbar" aria-label="Quest progress" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0"><div id="progressBar"></div></div>
     <div id="qNum" class="question-number">Question 1</div>
     <div id="question" class="question"></div>
     <div id="answers" class="answers"></div>
-    <div id="feedback" class="feedback"></div>
+    <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
     <button id="nextBtn" class="primary next hidden" onclick="nextQuestion()">Next Question →</button>
   </section>
 
@@ -179,6 +179,9 @@ function renderQuestion() {
   document.getElementById('qNum').textContent = `Question ${current + 1}`;
   document.getElementById('question').textContent = item.q;
   document.getElementById('progressBar').style.width = `${(current / questions.length) * 100}%`;
+  const progress = document.querySelector('.progress');
+  progress.setAttribute('aria-valuemax', questions.length);
+  progress.setAttribute('aria-valuenow', current);
   document.getElementById('feedback').textContent = '';
   document.getElementById('feedback').className = 'feedback';
   document.getElementById('nextBtn').classList.add('hidden');
@@ -250,6 +253,7 @@ function showResults() {
   document.getElementById('accuracyStat').textContent = `${pct}%`;
   document.getElementById('bestStreakStat').textContent = bestStreak;
   document.getElementById('progressBar').style.width = '100%';
+  document.querySelector('.progress').setAttribute('aria-valuenow', total);
 }
 
 function escapeHTML(str) {
